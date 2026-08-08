@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vansh's WebOS</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-dark">
+
+  <!-- fake boot log, gets typed out line by line in app.js -->
+  <div id="boot-screen">
+    <div class="boot-term">
+      <div class="boot-lines" id="boot-lines"></div><span class="boot-cursor">█</span>
+    </div>
+  </div>
+
+  <header id="panel">
+    <div class="panel-left">
+      <button class="start-btn" onclick="toggleStartMenu()">⚡ MyOS</button>
+      <button class="nav-btn" onclick="openWindow('about-app')">About</button>
+      <button class="nav-btn" onclick="openWindow('notes-app')">Notes</button>
+      <button class="nav-btn" onclick="openWindow('calc-app')">Calc</button>
+      <button class="nav-btn" onclick="openWindow('todo-app')">Tasks</button>
+      <button class="nav-btn" onclick="openWindow('theme-app')">Theme</button>
+    </div>
+    <div class="panel-right">
+      <span id="clock-widget">12:00</span>
+    </div>
+  </header>
+
+  <main id="desktop">
+
+    <div class="desktop-icon" onclick="openWindow('about-app')">
+      <div class="icon-img">👤</div>
+      <span>about_me</span>
+    </div>
+    <div class="desktop-icon" onclick="openWindow('notes-app')">
+      <div class="icon-img">📝</div>
+      <span>scratchpad</span>
+    </div>
+    <div class="desktop-icon" onclick="openWindow('calc-app')">
+      <div class="icon-img">🧮</div>
+      <span>calc.exe</span>
+    </div>
+    <div class="desktop-icon" onclick="openWindow('todo-app')">
+      <div class="icon-img">✅</div>
+      <span>tasks</span>
+    </div>
+    <div class="desktop-icon" onclick="openWindow('theme-app')">
+      <div class="icon-img">🎨</div>
+      <span>appearance</span>
+    </div>
+
+    <!-- about me -->
+    <div class="window" id="about-app" data-win>
+      <div class="window-header">
+        <span class="title">ABOUT_ME.TXT</span>
+        <div class="win-controls">
+          <button class="min-btn" onclick="minimizeWindow('about-app')">_</button>
+          <button class="close-btn" onclick="closeWindow('about-app')">✕</button>
+        </div>
+      </div>
+      <div class="window-body">
+        <h3>hey, I'm Vansh 👋</h3>
+        <p>This is a little desktop OS I built for Hack Club's Stardance Challenge — windows drag, apps remember what you were doing, and the whole thing reskins itself from the Appearance app.</p>
+        <br>
+        <p>Poke around: write something in the scratchpad, add a task, or right-click the desktop for a couple of shortcuts.</p>
+      </div>
+    </div>
+
+    <!-- scratchpad, autosaves on every keystroke -->
+    <div class="window" id="notes-app" data-win>
+      <div class="window-header">
+        <span class="title">SCRATCHPAD</span>
+        <div class="win-controls">
+          <button class="min-btn" onclick="minimizeWindow('notes-app')">_</button>
+          <button class="close-btn" onclick="closeWindow('notes-app')">✕</button>
+        </div>
+      </div>
+      <div class="window-body">
+        <textarea id="notes-text" placeholder="jot something down — it sticks around, promise."></textarea>
+      </div>
+    </div>
+
+    <!-- calculator -->
+    <div class="window" id="calc-app" data-win>
+      <div class="window-header">
+        <span class="title">CALC.EXE</span>
+        <div class="win-controls">
+          <button class="min-btn" onclick="minimizeWindow('calc-app')">_</button>
+          <button class="close-btn" onclick="closeWindow('calc-app')">✕</button>
+        </div>
+      </div>
+      <div class="window-body">
+        <div class="calc-display" id="calc-display">0</div>
+        <div class="calc-grid">
+          <button class="calc-btn calc-op" onclick="calcClear()">C</button>
+          <button class="calc-btn calc-op" onclick="calcBackspace()">⌫</button>
+          <button class="calc-btn calc-op" onclick="calcInput('%')">%</button>
+          <button class="calc-btn calc-op" onclick="calcInput('/')">÷</button>
+
+          <button class="calc-btn" onclick="calcInput('7')">7</button>
+          <button class="calc-btn" onclick="calcInput('8')">8</button>
+          <button class="calc-btn" onclick="calcInput('9')">9</button>
+          <button class="calc-btn calc-op" onclick="calcInput('*')">×</button>
+
+          <button class="calc-btn" onclick="calcInput('4')">4</button>
+          <button class="calc-btn" onclick="calcInput('5')">5</button>
+          <button class="calc-btn" onclick="calcInput('6')">6</button>
+          <button class="calc-btn calc-op" onclick="calcInput('-')">−</button>
+
+          <button class="calc-btn" onclick="calcInput('1')">1</button>
+          <button class="calc-btn" onclick="calcInput('2')">2</button>
+          <button class="calc-btn" onclick="calcInput('3')">3</button>
+          <button class="calc-btn calc-op" onclick="calcInput('+')">+</button>
+
+          <button class="calc-btn" onclick="calcInput('0')">0</button>
+          <button class="calc-btn" onclick="calcInput('.')">.</button>
+          <button class="calc-btn calc-equals" onclick="calcEquals()" style="grid-column: span 2;">=</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- todo list -->
+    <div class="window" id="todo-app" data-win>
+      <div class="window-header">
+        <span class="title">TASKS</span>
+        <div class="win-controls">
+          <button class="min-btn" onclick="minimizeWindow('todo-app')">_</button>
+          <button class="close-btn" onclick="closeWindow('todo-app')">✕</button>
+        </div>
+      </div>
+      <div class="window-body">
+        <div class="todo-input-row">
+          <input type="text" id="todo-input" placeholder="add a task, hit enter" onkeydown="if(event.key==='Enter') addTodo()">
+          <button class="todo-add-btn" onclick="addTodo()">+</button>
+        </div>
+        <ul class="todo-list" id="todo-list"></ul>
+      </div>
+    </div>
+
+    <!-- theme builder -->
+    <div class="window" id="theme-app" data-win>
+      <div class="window-header">
+        <span class="title">APPEARANCE</span>
+        <div class="win-controls">
+          <button class="min-btn" onclick="minimizeWindow('theme-app')">_</button>
+          <button class="close-btn" onclick="closeWindow('theme-app')">✕</button>
+        </div>
+      </div>
+      <div class="window-body">
+        <p class="section-label">presets</p>
+        <div class="theme-grid">
+          <button class="theme-choice" onclick="applyPreset('dark')">🟠 Amber</button>
+          <button class="theme-choice" onclick="applyPreset('sunset')">🌆 Dusk</button>
+          <button class="theme-choice" onclick="applyPreset('cyber')">📟 Phosphor</button>
+        </div>
+
+        <p class="section-label" style="margin-top:16px;">build your own</p>
+        <div class="custom-theme-grid">
+          <label>bg 1 <input type="color" id="color-bg1" value="#17140f" oninput="applyCustomTheme()"></label>
+          <label>bg 2 <input type="color" id="color-bg2" value="#221d15" oninput="applyCustomTheme()"></label>
+          <label>accent <input type="color" id="color-accent" value="#e7a33e" oninput="applyCustomTheme()"></label>
+          <label>text <input type="color" id="color-text" value="#efe6d3" oninput="applyCustomTheme()"></label>
+        </div>
+        <p class="theme-hint">saves automatically — reload and it's still yours.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- right click on the desktop to see this -->
+  <div id="context-menu">
+    <button onclick="cycleWallpaper()">🖼️ cycle wallpaper</button>
+    <button onclick="openWindow('theme-app'); hideContextMenu();">🎨 build a theme</button>
+    <button onclick="location.reload()">🔄 refresh desktop</button>
+  </div>
+
+  <!-- opens from the MyOS button top left -->
+  <div id="start-menu">
+    <button onclick="openWindow('about-app'); hideStartMenu();">👤 about_me</button>
+    <button onclick="openWindow('notes-app'); hideStartMenu();">📝 scratchpad</button>
+    <button onclick="openWindow('calc-app'); hideStartMenu();">🧮 calc.exe</button>
+    <button onclick="openWindow('todo-app'); hideStartMenu();">✅ tasks</button>
+    <button onclick="openWindow('theme-app'); hideStartMenu();">🎨 appearance</button>
+  </div>
+
+  <footer id="taskbar"></footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

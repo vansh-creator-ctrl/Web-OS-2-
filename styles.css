@@ -1,0 +1,663 @@
+/* styles.css - MyOS
+   retro terminal-ish desktop theme. everything routes through css variables
+   so switching themes in the appearance app restyles basically everything,
+   not just the background */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --font-display: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* amber (default theme) */
+  --bg: #17140f;
+  --bg-alt: #221d15;
+  --panel: #1c1811;
+  --text: #efe6d3;
+  --text-dim: #a79c86;
+  --accent: #e7a33e;
+  --accent-ink: #17140f;
+  --border: #0b0a07;
+  --stripe-a: #e7a33e;
+  --stripe-b: #b9791f;
+  --danger: #c1502e;
+  --ok: #7fa65c;
+  --bg-image: none;
+
+  /* these get overwritten live by the color pickers in the appearance app */
+  --custom-bg1: #17140f;
+  --custom-bg2: #221d15;
+  --custom-accent: #e7a33e;
+  --custom-text: #efe6d3;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  width: 100vw;
+  overflow: hidden;
+  background: var(--bg-image), var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  position: relative;
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+/* faint scanlines over everything, kind of a CRT thing. very subtle on purpose */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.1) 0px,
+    rgba(0, 0, 0, 0.1) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: overlay;
+  opacity: 0.35;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+/* theme: amber */
+body.bg-dark {
+  --bg: #17140f; --bg-alt: #221d15; --panel: #1c1811;
+  --text: #efe6d3; --text-dim: #a79c86;
+  --accent: #e7a33e; --accent-ink: #17140f;
+  --border: #0b0a07; --stripe-a: #e7a33e; --stripe-b: #b9791f;
+  --bg-image: none;
+}
+
+/* theme: dusk */
+body.bg-sunset {
+  --bg: #1b1730; --bg-alt: #241e3d; --panel: #1f1935;
+  --text: #ece4f5; --text-dim: #9088ae;
+  --accent: #c97fa0; --accent-ink: #1b1730;
+  --border: #0f0c1c; --stripe-a: #c97fa0; --stripe-b: #7c6ba8;
+  --bg-image: linear-gradient(160deg, rgba(201, 127, 160, 0.1), rgba(27, 23, 48, 0) 55%);
+}
+
+/* theme: phosphor (green CRT, forces mono font everywhere) */
+body.bg-cyber {
+  --bg: #050806; --bg-alt: #0b120d; --panel: #081009;
+  --text: #8fffb0; --text-dim: #3f7a52;
+  --accent: #39ff7a; --accent-ink: #020402;
+  --border: #020402; --stripe-a: #39ff7a; --stripe-b: #12401f;
+  --bg-image: none;
+  --font-display: 'IBM Plex Mono', 'Courier New', monospace;
+  --font-body: 'IBM Plex Mono', 'Courier New', monospace;
+}
+
+body.bg-cyber::before { opacity: 0.55; }
+
+/* theme: custom, built live from whatever's picked in the appearance app */
+body.bg-custom {
+  --bg: var(--custom-bg1);
+  --bg-alt: color-mix(in srgb, var(--custom-bg1) 60%, var(--custom-bg2) 40%);
+  --panel: var(--custom-bg2);
+  --text: var(--custom-text);
+  --text-dim: color-mix(in srgb, var(--custom-text) 55%, transparent);
+  --accent: var(--custom-accent);
+  --accent-ink: var(--custom-bg1);
+  --border: color-mix(in srgb, var(--custom-bg1) 70%, black);
+  --stripe-a: var(--custom-accent);
+  --stripe-b: color-mix(in srgb, var(--custom-accent) 60%, black);
+  --bg-image: linear-gradient(160deg, var(--custom-bg2), var(--custom-bg1));
+}
+
+/* boot screen */
+#boot-screen {
+  position: fixed;
+  inset: 0;
+  background: #050403;
+  color: #d9cba8;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+#boot-screen.hidden {
+  opacity: 0;
+  transform: translateY(-16px);
+  pointer-events: none;
+}
+
+.boot-term {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  line-height: 1.7;
+  width: 100%;
+  max-width: 420px;
+}
+
+.boot-lines div {
+  white-space: pre;
+  opacity: 0;
+  animation: boot-line-in 0.15s ease forwards;
+}
+
+@keyframes boot-line-in {
+  from { opacity: 0; transform: translateX(-4px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.boot-cursor {
+  display: inline-block;
+  font-family: var(--font-display);
+  animation: boot-blink 1s step-end infinite;
+}
+
+@keyframes boot-blink {
+  50% { opacity: 0; }
+}
+
+/* top bar */
+#panel {
+  height: 32px;
+  background: var(--panel);
+  border-bottom: 2px solid var(--accent);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  position: relative;
+  z-index: 9999;
+  font-family: var(--font-display);
+}
+
+.panel-left, .panel-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.start-btn {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: none;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 5px 10px;
+  border-radius: 2px;
+  cursor: pointer;
+  margin-right: 6px;
+  letter-spacing: 0.02em;
+}
+
+.nav-btn {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 4px 10px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  box-shadow: inset -1px -1px 0 rgba(0, 0, 0, 0.4), inset 1px 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.nav-btn:hover { filter: brightness(1.2); }
+.nav-btn:active { box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.4); }
+
+#clock-widget {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+/* desktop + icons */
+#desktop {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 32px - 40px);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 22px;
+  align-items: flex-start;
+}
+
+.desktop-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 74px;
+  cursor: pointer;
+  padding: 8px 4px;
+  border-radius: 4px;
+  user-select: none;
+}
+
+.desktop-icon:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.icon-img {
+  font-size: 1.6rem;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.4), inset 2px 2px 0 rgba(255, 255, 255, 0.06);
+}
+
+.desktop-icon span {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  text-align: center;
+  color: var(--text);
+  opacity: 0.9;
+}
+
+/* windows */
+.window {
+  position: absolute;
+  width: 320px;
+  min-height: 210px;
+  background: var(--bg-alt);
+  border: 2px solid var(--border);
+  border-radius: 3px;
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.4);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.window.open { display: flex; }
+.window.minimized { display: none; }
+
+/* default spawn positions - felt right after some trial and error */
+#about-app { top: 56px; left: 90px; }
+#notes-app { top: 110px; left: 440px; }
+#calc-app  { top: 84px; left: 760px; width: 250px; }
+#todo-app  { top: 250px; left: 440px; }
+#theme-app { top: 210px; left: 190px; }
+
+.window-header {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--stripe-a) 0px, var(--stripe-a) 5px,
+    var(--stripe-b) 5px, var(--stripe-b) 10px
+  );
+  padding: 6px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: grab;
+  user-select: none;
+  border-bottom: 2px solid var(--border);
+}
+
+.window-header:active { cursor: grabbing; }
+
+.title {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--accent-ink);
+  background: var(--text);
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+
+.win-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.min-btn, .close-btn {
+  border: 1px solid var(--border);
+  width: 20px;
+  height: 20px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset -1px -1px 0 rgba(0, 0, 0, 0.35), inset 1px 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.min-btn { background: var(--text); color: var(--accent-ink); }
+.close-btn { background: var(--danger); color: #fff; }
+
+.min-btn:active, .close-btn:active {
+  box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+.window-body {
+  padding: 14px;
+  flex: 1;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.window-body h3 {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+
+textarea {
+  width: 100%;
+  height: 120px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px;
+  border-radius: 2px;
+  resize: none;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+}
+
+.section-label {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.theme-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.theme-choice {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 7px 10px;
+  border-radius: 2px;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  box-shadow: inset -1px -1px 0 rgba(0, 0, 0, 0.35), inset 1px 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.theme-choice:hover { filter: brightness(1.2); }
+.theme-choice:active { box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.35); }
+
+/* custom theme builder */
+.custom-theme-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.custom-theme-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.custom-theme-grid input[type="color"] {
+  width: 100%;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+  background: none;
+  padding: 2px;
+}
+
+.theme-hint {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  margin-top: 10px;
+}
+
+/* calculator */
+.calc-display {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 12px 10px;
+  text-align: right;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.calc-btn {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 0;
+  border-radius: 2px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  box-shadow: inset -1px -1px 0 rgba(0, 0, 0, 0.35), inset 1px 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.calc-btn:hover { filter: brightness(1.2); }
+.calc-btn:active { box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.35); }
+
+.calc-op { color: var(--accent); }
+
+.calc-equals {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+/* todo app */
+.todo-input-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.todo-input-row input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 10px;
+  border-radius: 2px;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+}
+
+.todo-add-btn {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: 1px solid var(--border);
+  width: 34px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.todo-list {
+  list-style: none;
+  max-height: 155px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.todo-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  border-radius: 2px;
+  font-size: 0.83rem;
+}
+
+.todo-list li.done span.todo-text {
+  text-decoration: line-through;
+  color: var(--text-dim);
+}
+
+.todo-list li span.todo-text {
+  flex: 1;
+  word-break: break-word;
+}
+
+.todo-list li input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
+.todo-list li button {
+  background: none;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.todo-empty {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  padding: 8px 2px;
+}
+
+/* context menu + start menu share the same look */
+#context-menu, #start-menu {
+  position: fixed;
+  display: none;
+  flex-direction: column;
+  background: var(--bg-alt);
+  border: 2px solid var(--border);
+  border-radius: 3px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+  z-index: 100000;
+  overflow: hidden;
+  min-width: 180px;
+  font-family: var(--font-display);
+}
+
+#context-menu.visible, #start-menu.visible { display: flex; }
+
+#context-menu button, #start-menu button {
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  text-align: left;
+  padding: 9px 12px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-family: var(--font-display);
+}
+
+#context-menu button:last-child, #start-menu button:last-child { border-bottom: none; }
+#context-menu button:hover, #start-menu button:hover { background: var(--accent); color: var(--accent-ink); }
+
+#start-menu {
+  bottom: 46px;
+  left: 8px;
+}
+
+/* taskbar */
+#taskbar {
+  height: 40px;
+  background: var(--panel);
+  border-top: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  position: relative;
+  z-index: 9998;
+  font-family: var(--font-display);
+}
+
+.taskbar-item {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 5px 10px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-family: var(--font-display);
+  box-shadow: inset -1px -1px 0 rgba(0, 0, 0, 0.35), inset 1px 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.taskbar-item.minimized { opacity: 0.55; }
+.taskbar-item:hover { filter: brightness(1.2); }
+
+/* scrollbars, kept on theme so they don't look out of place */
+.todo-list::-webkit-scrollbar, textarea::-webkit-scrollbar {
+  width: 8px;
+}
+.todo-list::-webkit-scrollbar-thumb, textarea::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 4px;
+}
+.todo-list::-webkit-scrollbar-track, textarea::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+/* small screens - not perfect but usable */
+@media (max-width: 700px) {
+  #desktop { flex-direction: row; flex-wrap: wrap; gap: 14px; padding: 14px; height: calc(100vh - 32px - 40px); }
+  .window {
+    width: calc(100vw - 28px);
+    max-width: 340px;
+  }
+  #about-app { top: 46px; left: 14px; }
+  #notes-app { top: 46px; left: 14px; }
+  #calc-app  { top: 46px; left: 14px; width: calc(100vw - 28px); max-width: 280px; }
+  #todo-app  { top: 46px; left: 14px; }
+  #theme-app { top: 46px; left: 14px; }
+  .nav-btn { display: none; }
+  #start-menu { left: 6px; }
+}
